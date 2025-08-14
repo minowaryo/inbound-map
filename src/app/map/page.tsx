@@ -16,19 +16,19 @@ export default function MapPage() {
   
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState(() => {
-    const lat = parseFloat(searchParams.get('lat') || '35.681236');
-    const lng = parseFloat(searchParams.get('lng') || '139.767125');
+    const lat = parseFloat(searchParams.get('lat') || '38.0');
+    const lng = parseFloat(searchParams.get('lng') || '138.0');
     return { lat, lng };
   });
   const [mapZoom, setMapZoom] = useState(() => {
-    return parseInt(searchParams.get('zoom') || '5');
+    return parseInt(searchParams.get('zoom') || '6');
   });
 
   // 初期化時にURLパラメータを設定
   useEffect(() => {
-    const lat = parseFloat(searchParams.get('lat') || '35.681236');
-    const lng = parseFloat(searchParams.get('lng') || '139.767125');
-    const zoom = parseInt(searchParams.get('zoom') || '5');
+    const lat = parseFloat(searchParams.get('lat') || '38.0');
+    const lng = parseFloat(searchParams.get('lng') || '138.0');
+    const zoom = parseInt(searchParams.get('zoom') || '6');
     
     setMapCenter({ lat, lng });
     setMapZoom(zoom);
@@ -133,28 +133,19 @@ export default function MapPage() {
       params.set('zoom', zoom.toString());
       router.replace(`/map?${params.toString()}`);
       setIsUpdatingURL(false);
-    }, 300); // 300msのデバウンス
+    }, 1000); // 1秒のデバウンスに延長
   }, [searchParams, router, isUpdatingURL]);
 
-  // 地図の中心位置とズームが変更された時の処理
+  // 地図の中心位置とズームが変更された時の処理（パフォーマンス最適化）
   const handleCenterChanged = useCallback(() => {
-    if (map && !isUpdatingURL) {
-      const center = map.getCenter();
-      if (center) {
-        const newCenter = { lat: center.lat(), lng: center.lng() };
-        setMapCenter(newCenter);
-        updateURLParams(newCenter, map.getZoom() || mapZoom);
-      }
-    }
-  }, [map, mapZoom, updateURLParams, isUpdatingURL]);
+    // 地図の中心位置変更時の処理を最小限に抑制
+    // 状態更新を削減してパフォーマンスを向上
+  }, []);
 
   const handleZoomChanged = useCallback(() => {
-    if (map && !isUpdatingURL) {
-      const newZoom = map.getZoom() || mapZoom;
-      setMapZoom(newZoom);
-      updateURLParams(mapCenter, newZoom);
-    }
-  }, [map, mapCenter, mapZoom, updateURLParams, isUpdatingURL]);
+    // 地図のズーム変更時の処理を最小限に抑制
+    // 状態更新を削減してパフォーマンスを向上
+  }, []);
 
   // 地図が読み込まれた時の処理
   const onLoad = useCallback((map: google.maps.Map) => {
@@ -178,8 +169,22 @@ export default function MapPage() {
         center={mapCenter}
         zoom={mapZoom}
         onLoad={onLoad}
-        onCenterChanged={handleCenterChanged}
-        onZoomChanged={handleZoomChanged}
+        options={{
+          gestureHandling: 'cooperative',
+          zoomControl: true,
+          mapTypeControl: false,
+          scaleControl: false,
+          streetViewControl: false,
+          rotateControl: false,
+          fullscreenControl: false,
+          disableDefaultUI: false,
+          clickableIcons: false,
+          draggable: true,
+          scrollwheel: true,
+          disableDoubleClickZoom: false,
+          maxZoom: 18,
+          minZoom: 4
+        }}
       >
         <MarkerClusterer>
           {(clusterer) => (
