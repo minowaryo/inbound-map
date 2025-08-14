@@ -36,7 +36,7 @@ export default function MapPage() {
 
   const containerStyle = {
     width: '100%',
-    height: '500px',
+    height: '100vh', // ビューポートの高さ全体を使用
   };
 
   // 都市の座標と情報
@@ -157,13 +157,24 @@ export default function MapPage() {
     setSelectedCity(cityId);
   };
 
+  // マーカーホバリング時の処理
+  const handleMarkerMouseOver = (cityId: string) => {
+    setSelectedCity(cityId);
+  };
+
+  // マーカーホバリング終了時の処理
+  const handleMarkerMouseOut = () => {
+    setSelectedCity(null);
+  };
+
   // InfoWindowを閉じる処理
   const handleInfoWindowClose = () => {
     setSelectedCity(null);
   };
 
   return (
-    <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}>
+    <div className="map-page">
+      <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}>
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={mapCenter}
@@ -189,36 +200,59 @@ export default function MapPage() {
         <MarkerClusterer>
           {(clusterer) => (
             <>
-              {cities.map((city) => (
-                                 <Marker
+                             {cities.map((city) => (
+                 <Marker
                    key={city.id}
                    position={city.position}
                    title={city.name}
                    onClick={() => handleMarkerClick(city.id)}
+                   onMouseOver={() => handleMarkerMouseOver(city.id)}
+                   onMouseOut={handleMarkerMouseOut}
                    clusterer={clusterer}
                  />
-              ))}
+               ))}
             </>
           )}
         </MarkerClusterer>
 
-        {selectedCity && (
-          <InfoWindow
-            position={cities.find(city => city.id === selectedCity)?.position}
-            onCloseClick={handleInfoWindowClose}
-          >
-            <div style={{ padding: '8px', maxWidth: '200px' }}>
-              <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: 'bold' }}>
-                {cities.find(city => city.id === selectedCity)?.icon} 
-                {cities.find(city => city.id === selectedCity)?.name}
-              </h3>
-              <p style={{ margin: '0', fontSize: '14px', lineHeight: '1.4' }}>
-                {cities.find(city => city.id === selectedCity)?.description}
-              </p>
-            </div>
-          </InfoWindow>
-        )}
-      </GoogleMap>
-    </LoadScript>
+                 {selectedCity && (
+           <InfoWindow
+             position={cities.find(city => city.id === selectedCity)?.position}
+             onCloseClick={handleInfoWindowClose}
+             options={{
+               pixelOffset: new google.maps.Size(0, -40),
+               disableAutoPan: false
+             }}
+           >
+             <div style={{ 
+               padding: '8px', 
+               maxWidth: '200px',
+               backgroundColor: 'white',
+               borderRadius: '4px',
+               boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+             }}>
+               <h3 style={{ 
+                 margin: '0 0 8px 0', 
+                 fontSize: '16px', 
+                 fontWeight: 'bold',
+                 color: '#333'
+               }}>
+                 {cities.find(city => city.id === selectedCity)?.icon} 
+                 {cities.find(city => city.id === selectedCity)?.name}
+               </h3>
+               <p style={{ 
+                 margin: '0', 
+                 fontSize: '14px', 
+                 lineHeight: '1.4',
+                 color: '#666'
+               }}>
+                 {cities.find(city => city.id === selectedCity)?.description}
+               </p>
+             </div>
+           </InfoWindow>
+         )}
+       </GoogleMap>
+     </LoadScript>
+    </div>
   );
 }
