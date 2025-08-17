@@ -218,7 +218,6 @@ export default function MapPage() {
                  {selectedCity && (
            <InfoWindow
              position={cities.find(city => city.id === selectedCity)?.position}
-             onCloseClick={handleInfoWindowClose}
              options={{
                pixelOffset: new google.maps.Size(0, -40),
                disableAutoPan: false

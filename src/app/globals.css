@@ -36,3 +36,16 @@ body {
   margin: 0;
   padding: 0;
 }
+
+/* InfoWindowの閉じるボタンを非表示 */
+.gm-style .gm-style-iw-c button[title="閉じる"] {
+  display: none !important;
+}
+
+.gm-style .gm-style-iw-c .gm-ui-hover-effect {
+  display: none !important;
+}
+
+.gm-style .gm-style-iw-c .gm-ui-hover-effect > span {
+  display: none !important;
+}
